@@ -1,3 +1,5 @@
+#include <L3G.h>
+
 #include <Wire.h>
 #include <Zumo32U4.h>
 #include "TurnSensor.h"
@@ -99,7 +101,7 @@ void ManualControl(){
     case 'u': // 180 degrees - u turn
       turnRight(180);
       break;
-    case 'y'  // 360 degrees - turn
+    case 'y':  // 360 degrees - turn
       turnRight(360);
       break;
   }
