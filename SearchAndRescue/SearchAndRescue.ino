@@ -104,6 +104,8 @@ void ManualControl(){
     case 'y':  // 360 degrees - turn
       turnRight(360);
       break;
+    case 'b': // Stop the zumo
+      motors.setSpeed(0,0);
   }
 }
 

@@ -14,5 +14,6 @@ ProgrammingThings Assignment
 - 'e' zumo turns 90 degrees to the right
 - 'u' zumo u-turns 180 degrees from the right
 - 'y' zumo u-turns 360 degrees from the right
+- 'b' zumo stops
 
 github link - https://github.com/ManojKangokar/ZumoSearchAndRescue
