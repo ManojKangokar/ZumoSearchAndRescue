@@ -7,16 +7,18 @@ static final int maxWidth = 500;
 static final int minHeight = 250;
 static final int minWidth = 10;
 
-int startx = 260;
-int starty = 720;
-int endx = 260;
-int endy = 720;
+float robotX;
+float robotY;
+float robotHeading = 270;
 
 Serial port;  // Serial Port Object - to access serial port
 
 ControlP5 cp5; // ControlP5 object - for gui 
 
 void setup(){ 
+  
+  robotX = 260;
+  robotY = 740;
   
   size(520, 800);  // Window size, (width, height)
   port = new Serial(this, "/dev/cu.usbserial-DA01GXP5", 9600);  // Change this to your port
@@ -46,9 +48,9 @@ void setup(){
 
 void draw(){ 
 
-  background(179, 230, 255);
+  //background(179, 230, 255);
   
-  strokeWeight(2);  // creating a box to map zumo movement 
+  strokeWeight(2);  // creating a weight to map zumo movement 
   noFill();
   rect(minWidth, minHeight, maxWidth, maxHeight);
   
@@ -56,22 +58,31 @@ void draw(){
     String input = port.readString();
     switch(input){
       case "forward": 
-        endy += 1;
-        print("forward");
+        robotForward(10);
         break;
       case "stop":
-        line(260, 700, 260, 500);
-        line(startx, starty, endx, endy);
-        print("stop");
-        startx = endx;
-        starty = endy;
+        
         break;
       case "backward":
-        endy -= 1;
+        robotForward(-10);
+        break;
+      case "10r":
+        robotTurn(10);
+        break;
+      case "10l":
+        robotTurn(-10);
+        break;
+      case "90r":
+        robotTurn(90);
+        break;
+      case "90l":
+        robotTurn(-90);
+        break;
+      case "u":
+        robotTurn(180);
         break;
     }
   }
-  //line(x, y, x, y);
    
 }
 
@@ -148,4 +159,20 @@ void Right(){
 
 void Manual(){
   port.write('m');
+}
+
+void robotForward(float amount){
+  strokeWeight(10);
+  float newX = robotX + cos(radians(robotHeading)) * amount;
+  float newY = robotY + sin(radians(robotHeading)) * amount;
+
+  line(robotX, robotY, newX, newY);
+  fill(0);
+  
+  robotX = newX;
+  robotY = newY;
+}
+
+void robotTurn(float degrees){
+  robotHeading += degrees;
 }
