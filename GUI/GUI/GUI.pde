@@ -9,7 +9,10 @@ static final int minWidth = 10;
 
 float robotX;
 float robotY;
+
+//  for calibration
 float robotHeading = 270;
+float scale = 10;
 
 Serial port;  // Serial Port Object - to access serial port
 
@@ -55,32 +58,37 @@ void draw(){
   rect(minWidth, minHeight, maxWidth, maxHeight);
   
   while (port.available() > 0) {
+    
     String input = port.readString();
-    switch(input){
-      case "forward": 
-        robotForward(10);
-        break;
-      case "stop":
-        
-        break;
-      case "backward":
-        robotForward(-10);
-        break;
-      case "10r":
-        robotTurn(10);
-        break;
-      case "10l":
-        robotTurn(-10);
-        break;
-      case "90r":
-        robotTurn(90);
-        break;
-      case "90l":
-        robotTurn(-90);
-        break;
-      case "u":
-        robotTurn(180);
-        break;
+    //System.out.print(input);
+    if(input.equals("u-turn")){
+      robotTurn(180);
+    }else if(input.equals("full-turn")){
+      robotTurn(360);
+    }else if(input.length() >= 3){
+      String strAngle = input.substring(0,2);
+      char side = input.charAt(2);
+    
+      try{
+        int intAngle = Integer.parseInt(strAngle);
+        switch(side){
+          case 'r':
+            robotTurn(intAngle);
+            break;
+          case 'l':
+            robotTurn(intAngle * -1);
+            break;
+        }
+      }catch(NumberFormatException ex){
+        switch(input){
+          case "forward": 
+            robotForward(scale);
+            break;
+          case "backward":
+            robotForward(-scale);
+            break;
+        }
+      }
     }
   }
    

@@ -103,11 +103,11 @@ void ManualControl(){
       turnRight(90);
       break;
     case 'u': // 180 degrees - u turn
-      Serial1.print("u");
+      Serial1.print("u-turn");
       turnRight(180);
       break;
     case 'y':  // 360 degrees - turn
-      Serial1.print("360");
+      Serial1.print("full-turn");
       turnRight(180);
       turnRight(180);
       break;
@@ -115,9 +115,11 @@ void ManualControl(){
       Serial1.print("stop");
       motors.setSpeeds(0,0);
       break;
-    case 'b': // Stop the zumo
-      motors.setSpeed(0,0);
   }
+}
+
+void AutoControl() {
+  
 }
 
 void setup() {
@@ -134,9 +136,12 @@ void setup() {
 
 void loop() {
   turnSensorUpdate(); // start of every loop the angle is updated 
+
+  //control = Serial1.read();
+  
   switch(control){
     case 'm': 
-    ManualControl();
-    break;
+      ManualControl();
+      break;
   }
 }
