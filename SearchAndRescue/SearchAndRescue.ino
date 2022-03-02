@@ -73,36 +73,47 @@ void ManualControl(){
 
   switch(input){
     case 'w': // forward
+      Serial1.print("forward");
       motors.setSpeeds(speed,speed);
       delay(200);
       motors.setSpeeds(0,0);
+      Serial1.print("stop");
       break;
     case 'a': // left
-      motors.setSpeeds(speed * -1,speed);
-      delay(200);
-      motors.setSpeeds(0,0);
+      Serial1.print("10l");
+      turnLeft(10);
       break;
     case 's': // backwards
+      Serial1.print("backward");
       motors.setSpeeds(speed * -1,speed * -1);
       delay(200);
       motors.setSpeeds(0,0);
+      Serial1.print("stop");
       break;
     case 'd': // right
-      motors.setSpeeds(speed,speed * -1);
-      delay(200);
-      motors.setSpeeds(0,0);
+      Serial1.print("10r");
+      turnRight(10);
       break;
     case 'q': // 90 degrees left
+      Serial1.print("90l");
       turnLeft(90);
       break;
     case 'e': // 90 degrees right
+      Serial1.print("90r");
       turnRight(90);
       break;
     case 'u': // 180 degrees - u turn
+      Serial1.print("u");
       turnRight(180);
       break;
     case 'y':  // 360 degrees - turn
-      turnRight(360);
+      Serial1.print("360");
+      turnRight(180);
+      turnRight(180);
+      break;
+    case 'b': // Stop the zumo
+      Serial1.print("stop");
+      motors.setSpeeds(0,0);
       break;
   }
 }
@@ -124,7 +135,6 @@ void loop() {
   switch(control){
     case 'm': 
     ManualControl();
-    Serial1.print("Manual Control");
     break;
   }
 }
