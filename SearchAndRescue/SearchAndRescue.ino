@@ -73,54 +73,54 @@ void ManualControl(){
 
   switch(input){
     case 'w': // forward
-      Serial1.print("forward");
+      Serial1.println("forward");
       motors.setSpeeds(speed,speed);
       delay(200);
       motors.setSpeeds(0,0);
-      Serial1.print("stop");
+      Serial1.println("stop");
       break;
     case 'a': // left
-      Serial1.print("10l");
+      Serial1.println("10l");
       turnLeft(10);
       break;
     case 's': // backwards
-      Serial1.print("backward");
+      Serial1.println("backward");
       motors.setSpeeds(speed * -1,speed * -1);
       delay(200);
       motors.setSpeeds(0,0);
-      Serial1.print("stop");
+      Serial1.println("stop");
       break;
     case 'd': // right
-      Serial1.print("10r");
+      Serial1.println("10r");
       turnRight(10);
       break;
     case 'q': // 90 degrees left
-      Serial1.print("90l");
+      Serial1.println("90l");
       turnLeft(90);
       break;
     case 'e': // 90 degrees right
-      Serial1.print("90r");
+      Serial1.println("90r");
       turnRight(90);
       break;
     case 'u': // 180 degrees - u turn
-      Serial1.print("u-turn");
+      Serial1.println("u-turn");
       turnRight(180);
       break;
     case 'y':  // 360 degrees - turn
-      Serial1.print("full-turn");
+      Serial1.println("full-turn");
       turnRight(180);
       turnRight(180);
       break;
     case 'b': // Stop the zumo
-      Serial1.print("stop");
+      Serial1.println("stop");
       motors.setSpeeds(0,0);
       break;
     case 'm':
-      Serial1.print("Manual-control");
+      Serial1.println("Manual-control");
       control = 'm';
       break;
     case 'n':
-      Serial1.print("Auto-control");
+      Serial1.println("Auto-control");
       control = 'n';
       break;
   }
@@ -128,40 +128,46 @@ void ManualControl(){
 
 void SearchRoom(String direction){
   if(direction.equals("Right")){
-    Serial1.print("90r");
+    Serial1.println("90r");
     turnRight(90);
   }else if(direction.equals("Left")){
-    Serial1.print("90l");
+    Serial1.println("90l");
     turnLeft(90);
   }
 
-  Serial1.print("forward");
-  Serial1.print("stop");
-  Serial1.print("forward");
+  Serial1.println("forward");
   motors.setSpeeds(speed,speed);
-  delay(400);
+  delay(200);
   motors.setSpeeds(0,0);
-  Serial1.print("stop");
+  Serial1.println("stop");
+  Serial1.println("forward");
+  motors.setSpeeds(speed,speed);
+  delay(200);
+  motors.setSpeeds(0,0);
+  Serial1.println("stop");
 
   // start searching
-  Serial1.print("room");
+  Serial1.println("room");
   
   
 
-  Serial1.print("backward");
-  Serial1.print("stop");
-  Serial1.print("backward");
+  Serial1.println("backward");
   motors.setSpeeds(speed * -1,speed * -1);
-  delay(400);
+  delay(200);
   motors.setSpeeds(0,0);
-  Serial1.print("stop");
+  Serial1.println("stop");
+  Serial1.println("backward");
+  motors.setSpeeds(speed * -1,speed * -1);
+  delay(200);
+  motors.setSpeeds(0,0);
+  Serial1.println("stop");
   
   // turns back to where it was facing
   if(direction.equals("Right")){
-    Serial1.print("90l");
+    Serial1.println("90l");
     turnLeft(90);
   }else if(direction.equals("Left")){
-    Serial1.print("90r");
+    Serial1.println("90r");
     turnRight(90);
   }
 }
@@ -171,7 +177,7 @@ void AutoControl() {
 
   switch(input){
     case 'b': // Stop the zumo 
-      Serial1.print("stop");
+      Serial1.println("stop");
       motors.setSpeeds(0,0);
       break; 
     case 'g':
@@ -181,11 +187,11 @@ void AutoControl() {
       SearchRoom("Right");
       break;
     case 'm':
-      Serial1.print("Manual-control");
+      Serial1.println("Manual-control");
       control = 'm';
       break;
     case 'n':
-      Serial1.print("Auto-control");
+      Serial1.println("Auto-control");
       control = 'n';
       break;  
   }
@@ -196,6 +202,7 @@ void setup() {
   Serial1.begin(9600);
   lineSensors.initFiveSensors();  // inilizes 5 sensors 
   buttonA.waitForButton(); // for safety so motors dont turn until A hasnt been clicked 
+  proxSensors.initThreeSensors();
   calibrateSensors(); // calabrates sensors 
   control = 'm'; // setting control to manual
   turnSensorSetup();  // setting up gyro for turning set no of degrees

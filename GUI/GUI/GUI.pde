@@ -7,6 +7,8 @@ static final int maxHeight = 500;
 static final int maxWidth = 500;
 static final int minHeight = 250;
 static final int minWidth = 10;
+static final float roomSize = 10;
+static final float objectSize = 20;
 
 float robotX;
 float robotY;
@@ -76,9 +78,9 @@ void draw(){
     
     System.out.print(input);
     
-    if(input.equals("u-turn")){
+    if(input.contains("u-turn")){
       robotTurn(180);
-    }else if(input.equals("full-turn")){
+    }else if(input.contains("full-turn")){
       robotTurn(360);
     }else if(input.length() >= 3){
       String strAngle = input.substring(0,2);
@@ -95,26 +97,27 @@ void draw(){
             break;
         }
       }catch(NumberFormatException ex){
-        switch(input){
-          case "forward": 
-            robotForward(scale);
-            break;
-          case "backward":
-            robotForward(-scale);
-            break;
-        }
+        
       }
     }
-    // if there is a room then put a box, if it finds an object then put a circle that is red
-    if(input.equals("room")){
+    
+    if(input.contains("forward")){
+      
+      robotForward(scale);
+    }
+    if(input.contains("backward")){
+      robotForward(scale * -1);
+    }
+    if(input.contains("room")){
       roomLocationsX.add(robotX);
       roomLocationsY.add(robotY);
     }
-    if(input.equals("object")){
+    if(input.contains("object")){
       objectLocationsX.add(robotX);
       objectLocationsY.add(robotY);
     }
   }
+  // if there is a room then put a box, if it finds an object then put a circle that is red
   if (!(roomLocationsX.isEmpty())){
     for(int i = 0; i < roomLocationsX.size(); i++){
       fill(255,255,200);
@@ -124,7 +127,7 @@ void draw(){
   if (!(roomLocationsX.isEmpty())){
     for(int i = 0; i < objectLocationsX.size(); i++){
       fill(255,0,0);
-      circle(objectLocationsX, objectLocationsY, 20);
+      circle(objectLocationsX.get(i), objectLocationsY.get(i), objectSize);
     }
   }
    
