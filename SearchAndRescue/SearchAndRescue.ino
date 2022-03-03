@@ -115,11 +115,80 @@ void ManualControl(){
       Serial1.print("stop");
       motors.setSpeeds(0,0);
       break;
+    case 'm':
+      Serial1.print("Manual-control");
+      control = 'm';
+      break;
+    case 'n':
+      Serial1.print("Auto-control");
+      control = 'n';
+      break;
+  }
+}
+
+void SearchRoom(String direction){
+  if(direction.equals("Right")){
+    Serial1.print("90r");
+    turnRight(90);
+  }else if(direction.equals("Left")){
+    Serial1.print("90l");
+    turnLeft(90);
+  }
+
+  Serial1.print("forward");
+  Serial1.print("stop");
+  Serial1.print("forward");
+  motors.setSpeeds(speed,speed);
+  delay(400);
+  motors.setSpeeds(0,0);
+  Serial1.print("stop");
+
+  // start searching
+  Serial1.print("room");
+  
+  
+
+  Serial1.print("backward");
+  Serial1.print("stop");
+  Serial1.print("backward");
+  motors.setSpeeds(speed * -1,speed * -1);
+  delay(400);
+  motors.setSpeeds(0,0);
+  Serial1.print("stop");
+  
+  // turns back to where it was facing
+  if(direction.equals("Right")){
+    Serial1.print("90l");
+    turnLeft(90);
+  }else if(direction.equals("Left")){
+    Serial1.print("90r");
+    turnRight(90);
   }
 }
 
 void AutoControl() {
-  
+  input = Serial1.read();
+
+  switch(input){
+    case 'b': // Stop the zumo 
+      Serial1.print("stop");
+      motors.setSpeeds(0,0);
+      break; 
+    case 'g':
+      SearchRoom("Left");
+      break;
+    case 'h':
+      SearchRoom("Right");
+      break;
+    case 'm':
+      Serial1.print("Manual-control");
+      control = 'm';
+      break;
+    case 'n':
+      Serial1.print("Auto-control");
+      control = 'n';
+      break;  
+  }
 }
 
 void setup() {
@@ -136,12 +205,12 @@ void setup() {
 
 void loop() {
   turnSensorUpdate(); // start of every loop the angle is updated 
-
-  //control = Serial1.read();
   
   switch(control){
     case 'm': 
       ManualControl();
       break;
+    case 'n':
+      AutoControl();
   }
 }

@@ -1,5 +1,6 @@
 import controlP5.*;
 import processing.serial.*;
+import java.util.*;
 
 // defining boundaries for maping movements 
 static final int maxHeight = 500;
@@ -14,6 +15,12 @@ float robotY;
 float robotHeading = 270;
 float scale = 10;
 
+// for printing room locations
+ArrayList < Float > roomLocationsX = new ArrayList < Float > ();
+ArrayList < Float > roomLocationsY = new ArrayList < Float > ();
+
+ArrayList < Float > objectLocationsX = new ArrayList < Float > ();
+ArrayList < Float > objectLocationsY = new ArrayList < Float > ();
 Serial port;  // Serial Port Object - to access serial port
 
 ControlP5 cp5; // ControlP5 object - for gui 
@@ -47,6 +54,12 @@ void setup(){
   cp5.addButton("Right").setColorBackground(color(81, 206, 61)).setPosition(170, 170).setSize(70, 70);
 
   cp5.addButton("Manual").setColorBackground(color(153, 51, 255)).setPosition(250,10).setSize(70, 70);
+  
+  cp5.addButton("Auto").setColorBackground(color(153, 51, 255)).setPosition(250,90).setSize(70, 70);
+  
+  cp5.addButton("SearchLeft").setColorBackground(color(153, 51, 255)).setPosition(330,10).setSize(70, 70);
+
+  cp5.addButton("SearchRight").setColorBackground(color(153, 51, 255)).setPosition(410,10).setSize(70, 70);
 }
 
 void draw(){ 
@@ -60,7 +73,9 @@ void draw(){
   while (port.available() > 0) {
     
     String input = port.readString();
-    //System.out.print(input);
+    
+    System.out.print(input);
+    
     if(input.equals("u-turn")){
       robotTurn(180);
     }else if(input.equals("full-turn")){
@@ -89,6 +104,27 @@ void draw(){
             break;
         }
       }
+    }
+    // if there is a room then put a box, if it finds an object then put a circle that is red
+    if(input.equals("room")){
+      roomLocationsX.add(robotX);
+      roomLocationsY.add(robotY);
+    }
+    if(input.equals("object")){
+      objectLocationsX.add(robotX);
+      objectLocationsY.add(robotY);
+    }
+  }
+  if (!(roomLocationsX.isEmpty())){
+    for(int i = 0; i < roomLocationsX.size(); i++){
+      fill(255,255,200);
+      rect(roomLocationsX.get(i),roomLocationsY.get(i),-10,-10);
+    }
+  }
+  if (!(roomLocationsX.isEmpty())){
+    for(int i = 0; i < objectLocationsX.size(); i++){
+      fill(255,0,0);
+      circle(objectLocationsX, objectLocationsY, 20);
     }
   }
    
@@ -125,6 +161,12 @@ void keyPressed() {
       break;
     case 'm':
       port.write('m'); 
+      break;
+    case 'g':
+      port.write('g');
+      break;
+    case 'h':
+      port.write('h');
       break;
   }
 }
@@ -169,13 +211,29 @@ void Manual(){
   port.write('m');
 }
 
+void Auto(){
+  port.write('n');
+}
+
+void SearchLeft(){
+ port.write('g'); 
+}
+
+void SearchRight(){
+ port.write('h'); 
+}
+
 void robotForward(float amount){
   strokeWeight(10);
   float newX = robotX + cos(radians(robotHeading)) * amount;
   float newY = robotY + sin(radians(robotHeading)) * amount;
-
-  line(robotX, robotY, newX, newY);
+  
   fill(0);
+  line(robotX, robotY, newX, newY);
+  strokeWeight(1);
+  fill(204, 102, 0);
+  circle(newX, newY, 10);
+  
   
   robotX = newX;
   robotY = newY;
