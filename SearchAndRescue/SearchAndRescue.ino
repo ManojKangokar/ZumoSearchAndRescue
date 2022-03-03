@@ -8,6 +8,7 @@ Zumo32U4Motors motors;
 Zumo32U4ButtonA buttonA;
 Zumo32U4Buzzer buzzer;
 Zumo32U4LineSensors lineSensors;
+Zumo32U4ProximitySensors proxSensors;
 L3G gyro;
 
 #define NUM_SENSORS 5
@@ -17,6 +18,8 @@ L3G gyro;
 unsigned int lineSensorValues[NUM_SENSORS];
 
 int calabration[NUM_SENSORS];
+
+int proxyCalibration = 4;
 
 char control;
 char input;
@@ -126,6 +129,20 @@ void ManualControl(){
   }
 }
 
+boolean SearchUsingProxy(){
+  proxSensors.read();    
+  int left_sensor = proxSensors.countsLeftWithLeftLeds();
+  int center_left_sensor = proxSensors.countsFrontWithLeftLeds();
+  int center_right_sensor = proxSensors.countsFrontWithRightLeds();
+  int right_sensor = proxSensors.countsRightWithRightLeds();
+
+  if(left_sensor >= proxyCalibration || center_left_sensor >= proxyCalibration || center_right_sensor >= proxyCalibration || right_sensor >= proxyCalibration){
+    buzzer.playNote(NOTE_G(4), 500, 15);
+    return true;
+  }
+  return false;
+}
+
 void SearchRoom(String direction){
   if(direction.equals("Right")){
     Serial1.println("90r");
@@ -148,8 +165,21 @@ void SearchRoom(String direction){
 
   // start searching
   Serial1.println("room");
-  
-  
+  if(SearchUsingProxy() == true){ // look infront
+    Serial1.println("object");
+  }
+  turnLeft(45);
+  Serial1.println("45l");
+  if(SearchUsingProxy() == true){ // look left
+    Serial1.println("object");
+  }
+  turnRight(90);
+  Serial1.println("90r"); 
+  if(SearchUsingProxy() == true){ // look right
+    Serial1.println("object");
+  }
+  turnLeft(45); // turn back to where the robot was facing
+  Serial1.println("45l");
 
   Serial1.println("backward");
   motors.setSpeeds(speed * -1,speed * -1);
