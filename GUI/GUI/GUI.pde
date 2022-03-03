@@ -10,12 +10,15 @@ static final int minWidth = 10;
 static final float roomSize = 10;
 static final float objectSize = 20;
 
+String displayText;
+String modeText;
+
 float robotX;
 float robotY;
 
 //  for calibration
 float robotHeading = 270;
-float scale = 10;
+float scale = 5;
 
 // for printing room locations
 ArrayList < Float > roomLocationsX = new ArrayList < Float > ();
@@ -29,11 +32,14 @@ ControlP5 cp5; // ControlP5 object - for gui
 
 void setup(){ 
   
-  robotX = 260;
+  robotX = 250;
   robotY = 740;
   
+  displayText = "System Ok";
+  modeText = "Manual-control";
+  //DA01GXP5
   size(520, 800);  // Window size, (width, height)
-  port = new Serial(this, "/dev/cu.usbserial-DA01GXP5", 9600);  // Change this to your port
+  port = new Serial(this, "/dev/cu.usbserial-AL1L30CR", 9600);  // Change this to your port
   
   cp5 = new ControlP5(this);
   
@@ -82,6 +88,10 @@ void draw(){
       robotTurn(180);
     }else if(input.contains("full-turn")){
       robotTurn(360);
+    }else if(input.contains("90l")){
+      robotTurn(360 - 90);
+    }else if(input.contains("90r")){
+      robotTurn(90);
     }else if(input.length() >= 3){
       String strAngle = input.substring(0,2);
       char side = input.charAt(2);
@@ -93,7 +103,7 @@ void draw(){
             robotTurn(intAngle);
             break;
           case 'l':
-            robotTurn(intAngle * -1);
+            robotTurn(360 - intAngle);
             break;
         }
       }catch(NumberFormatException ex){
@@ -116,6 +126,15 @@ void draw(){
       objectLocationsX.add(robotX);
       objectLocationsY.add(robotY);
     }
+    if(input.contains("corner-hit")){
+      displayText = "Corner Hit";
+    }
+    if(input.contains("Auto-control")){
+      modeText = "Auto-control";
+    }
+    if(input.contains("Manual-control")){
+      modeText = "Manual-control";
+    }
   }
   // if there is a room then put a box, if it finds an object then put a circle that is red
   if (!(roomLocationsX.isEmpty())){
@@ -124,13 +143,18 @@ void draw(){
       rect(roomLocationsX.get(i),roomLocationsY.get(i),-10,-10);
     }
   }
-  if (!(roomLocationsX.isEmpty())){
+  if (!(objectLocationsX.isEmpty())){
     for(int i = 0; i < objectLocationsX.size(); i++){
       fill(255,0,0);
       circle(objectLocationsX.get(i), objectLocationsY.get(i), objectSize);
     }
   }
-   
+  fill(0);
+  rect(330,90,180,100);
+  fill(255);
+   textSize(28);
+   text(displayText, 330, 120); 
+   text(modeText, 330, 170); 
 }
 
 void keyPressed() {

@@ -23,8 +23,8 @@ Features:
 - 'u' Zumo u-turns 180 degrees from the right
 - 'y' Zumo u-turns 360 degrees from the right
 - 'n' starts autonomous control of the Zumo
-- 'g' in autonomous control, Zumo searches the room on its left
-- 'h' in autonomous control, Zumo searches the room on its right
+- 'g' Zumo searches the room on its left
+- 'h' Zumo searches the room on its right
 
 ## Limitations 
 - as this is a physical device things can and will go wrong, sensors and values need to be calabrated

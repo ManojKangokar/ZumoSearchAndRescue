@@ -12,15 +12,17 @@ Zumo32U4ProximitySensors proxSensors;
 L3G gyro;
 
 #define NUM_SENSORS 5
-#define speed 180
+#define speed 100
 #define turnSpeed 150
 
 unsigned int lineSensorValues[NUM_SENSORS];
 
 int calabration[NUM_SENSORS];
-
-int proxyCalibration = 4;
-
+boolean decisionPoint;
+int proxyCalibration = 5;
+int lineLimit = 150;
+int leftRouteCalibration;
+int rightRouteCalibration;
 char control;
 char input;
 
@@ -74,6 +76,9 @@ void turnRight(int degrees) {
 void ManualControl(){
   input = Serial1.read();
 
+  leftRouteCalibration = 0;
+  rightRouteCalibration = 0;
+
   switch(input){
     case 'w': // forward
       Serial1.println("forward");
@@ -100,10 +105,20 @@ void ManualControl(){
     case 'q': // 90 degrees left
       Serial1.println("90l");
       turnLeft(90);
+      if(decisionPoint == true){
+        decisionPoint = false;
+        Serial1.println("Auto-control");
+        control = 'n';
+      }
       break;
     case 'e': // 90 degrees right
       Serial1.println("90r");
       turnRight(90);
+      if(decisionPoint == true){
+        decisionPoint = false;
+        Serial1.println("Auto-control");
+        control = 'n';
+      }
       break;
     case 'u': // 180 degrees - u turn
       Serial1.println("u-turn");
@@ -125,6 +140,12 @@ void ManualControl(){
     case 'n':
       Serial1.println("Auto-control");
       control = 'n';
+      break;
+    case 'g':
+      SearchRoom("Left");
+      break;
+    case 'h':
+      SearchRoom("Right");
       break;
   }
 }
@@ -162,25 +183,28 @@ void SearchRoom(String direction){
   delay(200);
   motors.setSpeeds(0,0);
   Serial1.println("stop");
+  delay(200);
 
   // start searching
   Serial1.println("room");
   if(SearchUsingProxy() == true){ // look infront
     Serial1.println("object");
   }
+  delay(200);
   turnLeft(45);
-  Serial1.println("45l");
+  //Serial1.println("45l");
   if(SearchUsingProxy() == true){ // look left
     Serial1.println("object");
   }
+  delay(200);
   turnRight(90);
-  Serial1.println("90r"); 
+  //Serial1.println("90r"); 
   if(SearchUsingProxy() == true){ // look right
     Serial1.println("object");
   }
   turnLeft(45); // turn back to where the robot was facing
-  Serial1.println("45l");
-
+  //Serial1.println("45l");
+  delay(200);
   Serial1.println("backward");
   motors.setSpeeds(speed * -1,speed * -1);
   delay(200);
@@ -200,6 +224,41 @@ void SearchRoom(String direction){
     Serial1.println("90r");
     turnRight(90);
   }
+
+  // goes back to auto
+  Serial1.println("Auto-control");
+  control = 'n';
+}
+
+void ReachedDecisionPoint(){
+  Serial1.println("backward");
+  motors.setSpeeds(speed * -1,speed * -1);
+  delay(200);
+  motors.setSpeeds(0,0);
+  Serial1.println("stop");
+
+  decisionPoint = true;
+  Serial1.println("Manual-control");
+  control = 'm';
+}
+
+void directionCorrection(int side){
+  Serial1.println("backward");
+  motors.setSpeeds(speed * -1,speed * -1);
+  delay(200);
+  motors.setSpeeds(0,0);
+  Serial1.println("stop");
+  if(side == 0){ // if left got triggered
+    //Serial1.println("05r");
+    turnRight(5);
+  }else if(side == 1){  // if right got triggered
+    //Serial1.println("05l");
+    turnLeft(5);
+  }
+  Serial1.println("forward");
+  motors.setSpeeds(speed,speed);
+  delay(200);
+  motors.setSpeeds(0,0);
 }
 
 void AutoControl() {
@@ -209,6 +268,8 @@ void AutoControl() {
     case 'b': // Stop the zumo 
       Serial1.println("stop");
       motors.setSpeeds(0,0);
+      Serial1.println("Manual-control");
+      control = 'm';
       break; 
     case 'g':
       SearchRoom("Left");
@@ -225,15 +286,34 @@ void AutoControl() {
       control = 'n';
       break;  
   }
+  // all line sensors get hit
+  lineSensors.read(lineSensorValues);
+  if((lineSensorValues[0] >= lineLimit)  && (lineSensorValues[4] >= lineLimit)){
+    Serial1.println("corner-hit");
+    motors.setSpeeds(0,0);
+    ReachedDecisionPoint();
+  }else if(lineSensorValues[0] >= lineLimit){ // left line sensors get hit
+    motors.setSpeeds(0,0);
+    directionCorrection(0);
+  }else if(lineSensorValues[4] >= lineLimit){  // right line sensors get hit
+    motors.setSpeeds(0,0);
+    directionCorrection(1);
+  }else{  // else go forward 
+    Serial1.println("forward");
+    motors.setSpeeds(speed,speed);
+    delay(200);
+    motors.setSpeeds(0,0);
+  }
 }
 
 void setup() {
-  // TODO: set up all sensors
+  // set up all sensors
+  decisionPoint = false;
   Serial1.begin(9600);
   lineSensors.initFiveSensors();  // inilizes 5 sensors 
   buttonA.waitForButton(); // for safety so motors dont turn until A hasnt been clicked 
   proxSensors.initThreeSensors();
-  calibrateSensors(); // calabrates sensors 
+  //calibrateSensors(); // calabrates sensors 
   control = 'm'; // setting control to manual
   turnSensorSetup();  // setting up gyro for turning set no of degrees
   delay(500);
