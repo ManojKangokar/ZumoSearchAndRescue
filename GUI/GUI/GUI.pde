@@ -1,27 +1,45 @@
 import controlP5.*;
 import processing.serial.*;
+import java.util.*;
 
 // defining boundaries for maping movements 
 static final int maxHeight = 500;
 static final int maxWidth = 500;
 static final int minHeight = 250;
 static final int minWidth = 10;
+static final float roomSize = 10;
+static final float objectSize = 20;
+
+String displayText;
+String modeText;
 
 float robotX;
 float robotY;
-float robotHeading = 270;
 
+//  for calibration
+float robotHeading = 270;
+float scale = 5;
+
+// for printing room locations
+ArrayList < Float > roomLocationsX = new ArrayList < Float > ();
+ArrayList < Float > roomLocationsY = new ArrayList < Float > ();
+
+ArrayList < Float > objectLocationsX = new ArrayList < Float > ();
+ArrayList < Float > objectLocationsY = new ArrayList < Float > ();
 Serial port;  // Serial Port Object - to access serial port
 
 ControlP5 cp5; // ControlP5 object - for gui 
 
 void setup(){ 
   
-  robotX = 260;
+  robotX = 250;
   robotY = 740;
   
+  displayText = "System Ok";
+  modeText = "Manual-control";
+  //DA01GXP5
   size(520, 800);  // Window size, (width, height)
-  port = new Serial(this, "/dev/cu.usbserial-DA01GXP5", 9600);  // Change this to your port
+  port = new Serial(this, "/dev/cu.usbserial-AL1L30CR", 9600);  // Change this to your port
   
   cp5 = new ControlP5(this);
   
@@ -44,6 +62,12 @@ void setup(){
   cp5.addButton("Right").setColorBackground(color(81, 206, 61)).setPosition(170, 170).setSize(70, 70);
 
   cp5.addButton("Manual").setColorBackground(color(153, 51, 255)).setPosition(250,10).setSize(70, 70);
+  
+  cp5.addButton("Auto").setColorBackground(color(153, 51, 255)).setPosition(250,90).setSize(70, 70);
+  
+  cp5.addButton("SearchLeft").setColorBackground(color(153, 51, 255)).setPosition(330,10).setSize(70, 70);
+
+  cp5.addButton("SearchRight").setColorBackground(color(153, 51, 255)).setPosition(410,10).setSize(70, 70);
 }
 
 void draw(){ 
@@ -55,35 +79,82 @@ void draw(){
   rect(minWidth, minHeight, maxWidth, maxHeight);
   
   while (port.available() > 0) {
+    
     String input = port.readString();
-    switch(input){
-      case "forward": 
-        robotForward(10);
-        break;
-      case "stop":
+    
+    System.out.print(input);
+    
+    if(input.contains("u-turn")){
+      robotTurn(180);
+    }else if(input.contains("full-turn")){
+      robotTurn(360);
+    }else if(input.contains("90l")){
+      robotTurn(360 - 90);
+    }else if(input.contains("90r")){
+      robotTurn(90);
+    }else if(input.length() >= 3){
+      String strAngle = input.substring(0,2);
+      char side = input.charAt(2);
+    
+      try{
+        int intAngle = Integer.parseInt(strAngle);
+        switch(side){
+          case 'r':
+            robotTurn(intAngle);
+            break;
+          case 'l':
+            robotTurn(360 - intAngle);
+            break;
+        }
+      }catch(NumberFormatException ex){
         
-        break;
-      case "backward":
-        robotForward(-10);
-        break;
-      case "10r":
-        robotTurn(10);
-        break;
-      case "10l":
-        robotTurn(-10);
-        break;
-      case "90r":
-        robotTurn(90);
-        break;
-      case "90l":
-        robotTurn(-90);
-        break;
-      case "u":
-        robotTurn(180);
-        break;
+      }
+    }
+    
+    if(input.contains("forward")){
+      
+      robotForward(scale);
+    }
+    if(input.contains("backward")){
+      robotForward(scale * -1);
+    }
+    if(input.contains("room")){
+      roomLocationsX.add(robotX);
+      roomLocationsY.add(robotY);
+    }
+    if(input.contains("object")){
+      objectLocationsX.add(robotX);
+      objectLocationsY.add(robotY);
+    }
+    if(input.contains("corner-hit")){
+      displayText = "Corner Hit";
+    }
+    if(input.contains("Auto-control")){
+      modeText = "Auto-control";
+    }
+    if(input.contains("Manual-control")){
+      modeText = "Manual-control";
     }
   }
-   
+  // if there is a room then put a box, if it finds an object then put a circle that is red
+  if (!(roomLocationsX.isEmpty())){
+    for(int i = 0; i < roomLocationsX.size(); i++){
+      fill(255,255,200);
+      rect(roomLocationsX.get(i),roomLocationsY.get(i),-10,-10);
+    }
+  }
+  if (!(objectLocationsX.isEmpty())){
+    for(int i = 0; i < objectLocationsX.size(); i++){
+      fill(255,0,0);
+      circle(objectLocationsX.get(i), objectLocationsY.get(i), objectSize);
+    }
+  }
+  fill(0);
+  rect(330,90,180,100);
+  fill(255);
+   textSize(28);
+   text(displayText, 330, 120); 
+   text(modeText, 330, 170); 
 }
 
 void keyPressed() {
@@ -117,6 +188,12 @@ void keyPressed() {
       break;
     case 'm':
       port.write('m'); 
+      break;
+    case 'g':
+      port.write('g');
+      break;
+    case 'h':
+      port.write('h');
       break;
   }
 }
@@ -161,13 +238,29 @@ void Manual(){
   port.write('m');
 }
 
+void Auto(){
+  port.write('n');
+}
+
+void SearchLeft(){
+ port.write('g'); 
+}
+
+void SearchRight(){
+ port.write('h'); 
+}
+
 void robotForward(float amount){
   strokeWeight(10);
   float newX = robotX + cos(radians(robotHeading)) * amount;
   float newY = robotY + sin(radians(robotHeading)) * amount;
-
-  line(robotX, robotY, newX, newY);
+  
   fill(0);
+  line(robotX, robotY, newX, newY);
+  strokeWeight(1);
+  fill(204, 102, 0);
+  circle(newX, newY, 10);
+  
   
   robotX = newX;
   robotY = newY;

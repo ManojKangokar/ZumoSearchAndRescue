@@ -22,5 +22,12 @@ Features:
 - 'e' Zumo turns 90 degrees to the right
 - 'u' Zumo u-turns 180 degrees from the right
 - 'y' Zumo u-turns 360 degrees from the right
+- 'n' starts autonomous control of the Zumo
+- 'g' Zumo searches the room on its left
+- 'h' Zumo searches the room on its right
+
+## Limitations 
+- as this is a physical device things can and will go wrong, sensors and values need to be calabrated
+- the distance Zumo travels on the map is fixed, play with the value scale to change the scale if the Zumo goes out of the map 
 
 github link - https://github.com/ManojKangokar/ZumoSearchAndRescue
